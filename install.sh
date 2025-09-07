@@ -12,6 +12,7 @@ TOOL_NAME="Luca"
 INSTALL_DIR="/usr/local/bin"
 TOOL_FOLDER=".luca"
 VERSION_FILE="${PWD}/.luca-version"
+ORGANIZATION="LucaTools"
 REPOSITORY_URL="https://github.com/LucaTools/Luca"
 TOOL_DIR="$HOME/$TOOL_FOLDER"
 SHELL_HOOK_SCRIPT_PATH="$TOOL_DIR/shell_hook.sh"
@@ -25,7 +26,7 @@ SHELL_HOOK_SCRIPT_URL="https://raw.githubusercontent.com/LucaTools/LucaInstall/H
 if [ ! -f "$VERSION_FILE" ]; then
     echo "Missing $VERSION_FILE. Fetching the latest version"
     # Fetch latest release version from GitHub API
-    REQUIRED_EXECUTABLE_VERSION=$(curl -LSsf "https://api.github.com/repos/LucaTools/Luca/releases/latest" | grep '"tag_name":' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
+    REQUIRED_EXECUTABLE_VERSION=$(curl -LSsf "https://api.github.com/repos/$ORGANIZATION/$TOOL_NAME/releases/latest" | grep '"tag_name":' | sed 's/.*"tag_name": *"\([^"]*\)".*/\1/')
     
     if [ -z "$REQUIRED_EXECUTABLE_VERSION" ]; then
         echo "ERROR: Could not fetch latest version from $REPOSITORY_URL"
@@ -146,77 +147,78 @@ fi
 # Skip the download and installation if version is already current
 if [ "$SKIP_INSTALLATION" = "true" ]; then
     echo "Skipping Luca download and installation..."
-else
-    # =============================================================================
-    # LUCA DOWNLOAD AND INSTALLATION
-    # =============================================================================
-
-    echo "📥 Downloading $TOOL_NAME ($REQUIRED_EXECUTABLE_VERSION)..."
-    
-    # Download the appropriate version for the detected OS
-    # Use the updated URL pointing to the new S3 bucket
-    curl -LSsf --output "./$TEMP_EXECUTABLE_ZIP_FILENAME" \
-        "https://luca-tool-manager-scripts.s3.eu-west-2.amazonaws.com/$TOOL_NAME/$REQUIRED_EXECUTABLE_VERSION/$TEMP_EXECUTABLE_ZIP_FILENAME"
-
-    DOWNLOAD_SUCCESS=$?
-    if [ $DOWNLOAD_SUCCESS -ne 0 ]; then
-        echo "❌ ERROR: Could not download $TOOL_NAME ($REQUIRED_EXECUTABLE_VERSION)."
-        echo "Please check your internet connection and verify the version exists."
-        exit 1
-    fi
-
-    echo "✅ Download completed successfully"
-
-    # =============================================================================
-    # EXTRACTION AND INSTALLATION
-    # =============================================================================
-
-    echo "📦 Extracting $TEMP_EXECUTABLE_ZIP_FILENAME..."
-    
-    # Extract the downloaded zip file quietly
-    if ! unzip -o -qq "./$TEMP_EXECUTABLE_ZIP_FILENAME" -d ./; then
-        echo "❌ ERROR: Failed to extract $TEMP_EXECUTABLE_ZIP_FILENAME"
-        rm -f "./$TEMP_EXECUTABLE_ZIP_FILENAME"
-        exit 1
-    fi
-
-    echo "✅ Extraction completed"
-
-    # Clean up the downloaded zip file
-    rm "./$TEMP_EXECUTABLE_ZIP_FILENAME"
-    echo "🧹 Cleaned up temporary files"
-
-    # =============================================================================
-    # SYSTEM INSTALLATION WITH PRIVILEGE HANDLING
-    # =============================================================================
-
-    # Helper function to run commands with sudo only if needed
-    # This checks if the install directory is writable before using sudo
-    sudo_if_install_dir_not_writeable() {
-        local command="$1"
-        if [ -w "$INSTALL_DIR" ]; then
-            # Directory is writable, run without sudo
-            sh -c "$command"
-        else
-            # Directory requires elevated privileges
-            echo "🔐 Administrator privileges required for installation to $INSTALL_DIR"
-            sudo sh -c "$command"
-        fi
-    }
-
-    # Create install directory if it doesn't exist
-    if [ ! -d "$INSTALL_DIR" ]; then
-        echo "📁 Creating install directory: $INSTALL_DIR"
-        sudo_if_install_dir_not_writeable "mkdir -p $INSTALL_DIR"
-    fi
-
-    # Move the executable to the install directory and make it executable
-    echo "🚀 Installing $TOOL_NAME to $INSTALL_DIR..."
-    sudo_if_install_dir_not_writeable "mv $TOOL_NAME $EXECUTABLE_FILE"
-    sudo_if_install_dir_not_writeable "chmod +x $EXECUTABLE_FILE"
-
-    echo "✅ $TOOL_NAME ($REQUIRED_EXECUTABLE_VERSION) successfully installed to $INSTALL_DIR"
+    exit 0
 fi
+    
+# =============================================================================
+# LUCA DOWNLOAD AND INSTALLATION
+# =============================================================================
+
+echo "📥 Downloading $TOOL_NAME ($REQUIRED_EXECUTABLE_VERSION)..."
+
+# Download the appropriate version for the detected OS
+# Use the updated URL pointing to the new S3 bucket
+curl -LSsf --output "./$TEMP_EXECUTABLE_ZIP_FILENAME" \
+    "$REPOSITORY_URL/releases/download/$REQUIRED_EXECUTABLE_VERSION/$TEMP_EXECUTABLE_ZIP_FILENAME"
+
+DOWNLOAD_SUCCESS=$?
+if [ $DOWNLOAD_SUCCESS -ne 0 ]; then
+    echo "❌ ERROR: Could not download $TOOL_NAME ($REQUIRED_EXECUTABLE_VERSION)."
+    echo "Please check your internet connection and verify the version exists."
+    exit 1
+fi
+
+echo "✅ Download completed successfully"
+
+# =============================================================================
+# EXTRACTION AND INSTALLATION
+# =============================================================================
+
+echo "📦 Extracting $TEMP_EXECUTABLE_ZIP_FILENAME..."
+
+# Extract the downloaded zip file quietly
+if ! unzip -o -qq "./$TEMP_EXECUTABLE_ZIP_FILENAME" -d ./; then
+    echo "❌ ERROR: Failed to extract $TEMP_EXECUTABLE_ZIP_FILENAME"
+    rm -f "./$TEMP_EXECUTABLE_ZIP_FILENAME"
+    exit 1
+fi
+
+echo "✅ Extraction completed"
+
+# Clean up the downloaded zip file
+rm "./$TEMP_EXECUTABLE_ZIP_FILENAME"
+echo "🧹 Cleaned up temporary files"
+
+# =============================================================================
+# SYSTEM INSTALLATION WITH PRIVILEGE HANDLING
+# =============================================================================
+
+# Helper function to run commands with sudo only if needed
+# This checks if the install directory is writable before using sudo
+sudo_if_install_dir_not_writeable() {
+    local command="$1"
+    if [ -w "$INSTALL_DIR" ]; then
+        # Directory is writable, run without sudo
+        sh -c "$command"
+    else
+        # Directory requires elevated privileges
+        echo "🔐 Administrator privileges required for installation to $INSTALL_DIR"
+        sudo sh -c "$command"
+    fi
+}
+
+# Create install directory if it doesn't exist
+if [ ! -d "$INSTALL_DIR" ]; then
+    echo "📁 Creating install directory: $INSTALL_DIR"
+    sudo_if_install_dir_not_writeable "mkdir -p $INSTALL_DIR"
+fi
+
+# Move the executable to the install directory and make it executable
+echo "🚀 Installing $TOOL_NAME to $INSTALL_DIR..."
+sudo_if_install_dir_not_writeable "mv $TOOL_NAME $EXECUTABLE_FILE"
+sudo_if_install_dir_not_writeable "chmod +x $EXECUTABLE_FILE"
+
+echo "✅ $TOOL_NAME ($REQUIRED_EXECUTABLE_VERSION) successfully installed to $INSTALL_DIR"
 
 # =============================================================================
 # SHELL HOOK SETUP
