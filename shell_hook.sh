@@ -95,8 +95,8 @@ install_shell_hook() {
     
     echo "✅ Shell hook installed in $shell_rc_file"
     echo "💡 Please restart your shell or run: source $shell_rc_file"
-  else
-    # echo "ℹ️  Shell hook already present in $shell_rc_file"
+  # else
+  #   echo "ℹ️  Shell hook already present in $shell_rc_file"
   fi
 }
 
