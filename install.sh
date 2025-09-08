@@ -109,8 +109,6 @@ if [ -f "$EXECUTABLE_FILE" ]; then
     # Compare versions to avoid unnecessary reinstallation
     if [ "$EXISTING_EXECUTABLE_VERSION" = "$REQUIRED_EXECUTABLE_VERSION" ]; then
         echo "✅ $TOOL_NAME version $REQUIRED_EXECUTABLE_VERSION is already up to date."
-        echo "Skipping installation. Proceeding to shell hook setup..."
-        # Skip to hook installation but don't exit completely
         SKIP_INSTALLATION=true
     else
         echo "Current version: $EXISTING_EXECUTABLE_VERSION"
@@ -146,7 +144,7 @@ fi
 
 # Skip the download and installation if version is already current
 if [ "$SKIP_INSTALLATION" = "true" ]; then
-    echo "Skipping Luca download and installation..."
+    echo "Skipping $TOOL_NAME download and installation..."
     exit 0
 fi
     
