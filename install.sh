@@ -9,6 +9,7 @@
 # =============================================================================
 
 TOOL_NAME="Luca"
+BIN_NAME="luca"
 INSTALL_DIR="/usr/local/bin"
 TOOL_FOLDER=".luca"
 VERSION_FILE="${PWD}/.luca-version"
@@ -97,7 +98,7 @@ fi
 # VERSION CHECK - SKIP IF ALREADY UP TO DATE
 # =============================================================================
 
-EXECUTABLE_FILE="$INSTALL_DIR/$TOOL_NAME"
+EXECUTABLE_FILE="$INSTALL_DIR/$BIN_NAME"
 
 # Check if Luca is already installed and up-to-date
 if [ -f "$EXECUTABLE_FILE" ]; then
@@ -283,5 +284,5 @@ case "$SHELL" in
 esac
 
 echo "   1. Restart your terminal or run: source $SHELL_PROFILE"
-echo "   2. Run: $TOOL_NAME --help"
+echo "   2. Run: $BIN_NAME --help"
 echo ""
