@@ -17,7 +17,7 @@ ORGANIZATION="LucaTools"
 REPOSITORY_URL="https://github.com/LucaTools/Luca"
 TOOL_DIR="$HOME/$TOOL_FOLDER"
 SHELL_HOOK_SCRIPT_PATH="$TOOL_DIR/shell_hook.sh"
-SHELL_HOOK_SCRIPT_URL="https://raw.githubusercontent.com/LucaTools/LucaInstall/HEAD/shell_hook.sh"
+SHELL_HOOK_SCRIPT_URL="https://raw.githubusercontent.com/LucaTools/LucaScripts/HEAD/shell_hook.sh"
 
 # =============================================================================
 # TOOL VERSION DETECTION
